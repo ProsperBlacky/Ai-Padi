@@ -29,7 +29,7 @@ export default function Onboarding() {
     if (index === questions.length - 1) {
       localStorage.setItem("answers", JSON.stringify(updatedAnswers));
 
-      router.push("/result");
+      router.push("/Second");
       return;
     }
 
