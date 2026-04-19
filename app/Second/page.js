@@ -1,123 +1,88 @@
 "use client";
-
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
-export default function Onboarding() {
-  const router = useRouter();
+const questions = [
+  "What kind of activities give you energy?",
+  "How do you usually approach tasks?",
+  "Which best describes you: Creative, Analytical, Communication, Technical, or Flexible?",
+  "What type of work do you enjoy most?",
+  "Do you prefer structured tasks or flexible tasks?",
+  "Do you prefer working alone or with a team?",
+  "What skills are you already exploring?",
+  "Which area interests you most: Content, Design, Writing, Tech, Marketing?",
+  "How many hours per week can you commit?",
+  "What is your current income situation?",
+  "What tools do you have access to?",
+  "Why do you want to learn a digital skill?"
+];
 
-  const questions = [
-    "Are you introverted or extroverted?",
-    "Do you prefer structure or flexibility?",
-    "Do you enjoy deep focus or fast-paced work?",
-    "Are you more creative, analytical, or practical?",
-    "Do you prefer working with people or systems/tools?"
-  ];
-
-  const [index, setIndex] = useState(0);
+export default function Second() {
+  const [step, setStep] = useState(0);
   const [input, setInput] = useState("");
   const [answers, setAnswers] = useState([]);
+  const router = useRouter();
 
-  const handleNext = () => {
-    if (!input.trim()) return;
+  const next = () => {
+    if (!input) return;
 
-    const updatedAnswers = [...answers, input];
-    setAnswers(updatedAnswers);
+    const updated = [...answers, input];
+    setAnswers(updated);
     setInput("");
 
-    // last question → go to result page
-    if (index === questions.length - 1) {
-      localStorage.setItem("answers", JSON.stringify(updatedAnswers));
-
+    if (step < questions.length - 1) {
+      setStep(step + 1);
+    } else {
+      localStorage.setItem("answers", JSON.stringify(updated));
       router.push("/analyze");
-      return;
     }
-
-    // move to next question
-    setIndex(index + 1);
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.title}>PADI AGENT QUIZ</h2>
-
-      <div style={styles.card}>
-        <p style={styles.question}>
-          {questions[index]}
-        </p>
-
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your answer..."
-          style={styles.input}
-        />
-
-        <button onClick={handleNext} style={styles.button}>
-          {index === questions.length - 1 ? "Finish" : "Next"}
-        </button>
-
-        <p style={styles.progress}>
-          Question {index + 1} of {questions.length}
-        </p>
+    <div style={{ padding: 20 }}>
+      <div style={{
+        background: "#0F3D4C",
+        color: "#fff",
+        padding: 15,
+        borderRadius: 10
+      }}>
+        Question {step + 1} of {questions.length}
       </div>
+
+      <div style={{
+        marginTop: 30,
+        background: "#E6F2F5",
+        padding: 20,
+        borderRadius: 10
+      }}>
+        {questions[step]}
+      </div>
+
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Type your answer..."
+        style={{
+          width: "100%",
+          marginTop: 20,
+          padding: 10
+        }}
+      />
+
+      <button
+        onClick={next}
+        style={{
+          marginTop: 20,
+          background: "#F05A28",
+          color: "#fff",
+          padding: 10,
+          width: "100%",
+          border: "none",
+          borderRadius: 6
+        }}
+      >
+        Next
+      </button>
     </div>
   );
-}
-
-const styles = {
-  container: {
-    height: "100vh",
-    backgroundColor: "#000",
-    color: "#fff",
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: "20px",
-  },
-
-  title: {
-    color: "#00ff88",
-    marginBottom: "20px",
-    fontSize: "24px",
-  },
-
-  card: {
-    backgroundColor: "#111",
-    padding: "20px",
-    borderRadius: "10px",
-    width: "90%",
-    maxWidth: "400px",
-    textAlign: "center",
-  },
-
-  question: {
-    marginBottom: "15px",
-    fontSize: "16px",
-  },
-
-  input: {
-    width: "100%",
-    padding: "10px",
-    marginBottom: "15px",
-    border: "none",
-    borderRadius: "5px",
-  },
-
-  button: {
-    width: "100%",
-    padding: "10px",
-    backgroundColor: "#00ff88",
-    border: "none",
-    cursor: "pointer",
-    fontWeight: "bold",
-    borderRadius: "5px",
-  },
-
-  progress: {
-    marginTop: "10px",
-    fontSize: "12px",
-    color: "#aaa",
-  },
-};
+            }
