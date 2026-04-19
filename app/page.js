@@ -17,7 +17,7 @@ export default function Home() {
     localStorage.setItem("padi_email", email);
 
     // go to onboarding page
-    router.push("/onboarding");
+    router.push("/first");
   };
 
   return (
