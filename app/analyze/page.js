@@ -17,12 +17,15 @@ export default function Analyze() {
       const data = await res.json();
 
       localStorage.setItem("result", data.result);
-
       router.push("/result");
     };
 
     run();
   }, []);
 
-  return <p>Analyzing your answers...</p>;
+  return (
+    <div style={{ padding: 40 }}>
+      <h2>AI is analyzing your responses...</h2>
+    </div>
+  );
 }
