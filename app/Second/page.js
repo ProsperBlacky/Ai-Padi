@@ -1,40 +1,85 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import ChatBubble from "../components/ChatBubble";
 
 const questions = [
   "What kind of activities give you energy?",
-  "How do you usually approach tasks?",
-  "Which best describes you: Creative, Analytical, Communication, Technical, or Flexible?",
-  "What type of work do you enjoy most?",
-  "Do you prefer structured tasks or flexible tasks?",
+  "How do you approach tasks?",
+  "Are you more creative, analytical, or communicative?",
+  "Do you prefer working with people, systems, or ideas?",
+  "Structured or flexible work?",
   "Do you prefer working alone or with a team?",
   "What skills are you already exploring?",
-  "Which area interests you most: Content, Design, Writing, Tech, Marketing?",
+  "Which area interests you most?",
   "How many hours per week can you commit?",
   "What is your current income situation?",
-  "What tools do you have access to?",
+  "What tools do you have?",
   "Why do you want to learn a digital skill?"
 ];
 
-export default function Second() {
-  const [step, setStep] = useState(0);
+export default function ChatPage() {
+  const [messages, setMessages] = useState([
+    { text: "Hi 👋 I'm your AI Skill Advisor.", type: "ai" },
+    { text: questions[0], type: "ai" }
+  ]);
   const [input, setInput] = useState("");
+  const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState([]);
   const router = useRouter();
 
-  const next = () => {
+  const send = () => {
     if (!input) return;
 
-    const updated = [...answers, input];
-    setAnswers(updated);
-    setInput("");
+    const newMessages = [
+      ...messages,
+      { text: input, type: "user" }
+    ];
+
+    const newAnswers = [...answers, input];
 
     if (step < questions.length - 1) {
-      setStep(step + 1);
+      newMessages.push({
+        text: "Typing...",
+        type: "ai"
+      });
+
+      setTimeout(() => {
+        setMessages([
+          ...newMessages.slice(0, -1),
+          { text: questions[step + 1], type: "ai" }
+        ]);
+      }, 800);
     } else {
-      localStorage.setItem("answers", JSON.stringify(updated));
+      localStorage.setItem("answers", JSON.stringify(newAnswers));
       router.push("/analyze");
+    }
+
+    setMessages(newMessages);
+    setAnswers(newAnswers);
+    setInput("");
+    setStep(step + 1);
+  };
+
+  return (
+    <div style={{ padding: 20 }}>
+      {messages.map((msg, i) => (
+        <ChatBubble key={i} text={msg.text} type={msg.type} />
+      ))}
+
+      <div style={{ display: "flex", marginTop: 10 }}>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          style={{ flex: 1, padding: 10 }}
+        />
+        <button onClick={send} style={{ background: "#F05A28", color: "#fff", padding: 10 }}>
+          Send
+        </button>
+      </div>
+    </div>
+  );
+}      router.push("/analyze");
     }
   };
 
