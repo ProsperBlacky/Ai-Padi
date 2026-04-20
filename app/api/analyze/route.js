@@ -1,33 +1,18 @@
-import OpenAI from "openai";
-
 export async function POST(req) {
   try {
-    const { answers } = await req.json();
+    const body = await req.json();
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+    const input = body.input;
 
-    const prompt = `Analyze this user: ${JSON.stringify(answers)}`;
-
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }],
-    });
-
-    const text = response.choices[0].message.content;
+    // SIMPLE LOGIC (replace with AI later if you want)
+    const output = `You said: ${input}`;
 
     return Response.json({
-      result: text,
+      result: output,
     });
-
   } catch (error) {
-    return Response.json(
-      {
-        error: "AI analysis failed",
-        details: error.message,
-      },
-      { status: 500 }
-    );
+    return Response.json({
+      result: "Error occurred",
+    });
   }
 }
