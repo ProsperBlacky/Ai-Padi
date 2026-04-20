@@ -1,31 +1,43 @@
 "use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
-export default function Analyze() {
-  const router = useRouter();
+import { useState } from "react";
 
-  useEffect(() => {
-    const run = async () => {
-      const answers = JSON.parse(localStorage.getItem("answers"));
+export default function AnalyzePage() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState("");
 
-      const res = await fetch("/api/analyze", {
-        method: "POST",
-        body: JSON.stringify({ answers }),
-      });
+  const handleSubmit = async () => {
+    const res = await fetch("/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ input }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      localStorage.setItem("result", data.result);
-      router.push("/result");
-    };
-
-    run();
-  }, []);
+    // IMPORTANT: this is what prevents "undefined"
+    setResult(data.result);
+  };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h2>AI is analyzing your responses...</h2>
+    <div style={{ padding: 20 }}>
+      <h1>AI Analyze</h1>
+
+      <input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        placeholder="Type something..."
+        style={{ padding: 10, width: "100%" }}
+      />
+
+      <button onClick={handleSubmit} style={{ marginTop: 10 }}>
+        Analyze
+      </button>
+
+      <h3>Result:</h3>
+      <p>{result}</p>
     </div>
   );
 }
