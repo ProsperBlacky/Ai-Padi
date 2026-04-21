@@ -1,59 +1,62 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 export default function Analyze() {
   const router = useRouter();
-  const [loadingText, setLoadingText] = useState("Analyzing your responses");
 
   useEffect(() => {
-    // simple animation effect
-    const interval = setInterval(() => {
-      setLoadingText((prev) =>
-        prev.length > 30 ? "Analyzing your responses" : prev + "."
-      );
-    }, 500);
+    const runAnalysis = async () => {
+      const answers = JSON.parse(localStorage.getItem("answers"));
+      const name = localStorage.getItem("name");
 
-    const run = async () => {
-      try {
-        const raw = localStorage.getItem("answers");
+      const res = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answers, name })
+      });
 
-        // FIX 1: prevent crash if answers is null or invalid JSON
-        const answers = raw ? JSON.parse(raw) : null;
+      const data = await res.json();
 
-        const res = await fetch("/api/analyze", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          // FIX 2: prevent sending undefined payload
-          body: JSON.stringify({ answers: answers || [] }),
-        });
+      localStorage.setItem("result", data.result);
 
-        // FIX 3: prevent crash if API fails or returns non-json
-        if (!res.ok) {
-          throw new Error(`API Error: ${res.status}`);
-        }
-
-        const data = await res.json();
-
-        localStorage.setItem("result", data.result || "");
-
-        router.push("/result");
-      } catch (err) {
-        console.error("Error:", err);
-      }
+      router.push("/Result");
     };
 
-    run();
-
-    return () => clearInterval(interval);
-  }, [router]);
+    runAnalysis();
+  }, []);
 
   return (
-    <div style={{ padding: 40 }}>
-      <h2>{loadingText}</h2>
-      <p>Please wait while AI processes your answers...</p>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2>Analyzing your profile...</h2>
+        <p>Padi AI is building your career path</p>
+
+        <div style={styles.loader}></div>
+      </div>
     </div>
   );
-      }
+}
+
+const styles = {
+  container: {
+    height: "100vh",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "#F5F7F8"
+  },
+  card: {
+    textAlign: "center"
+  },
+  loader: {
+    marginTop: 20,
+    width: 40,
+    height: 40,
+    border: "4px solid #ddd",
+    borderTop: "4px solid #0F3D4C",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite"
+  }
+};
