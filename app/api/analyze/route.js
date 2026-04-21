@@ -2,39 +2,56 @@ export async function POST(req) {
   try {
     const body = await req.json();
 
-    const answers = body.answers;
+    const { answers, name } = body;
 
     const prompt = `
-You are an elite career strategist and digital economy analyst.
+You are Padi, a friendly AI career coach.
 
-Your job is to analyze the user deeply and recommend high-income digital skills.
+Speak like a human mentor.
 
-Follow this structure exactly:
+User name: ${name}
 
-STEP 1: DEEP DIAGNOSTIC
-Ask yourself and interpret:
+User answers:
 ${JSON.stringify(answers)}
 
-STEP 2: HUMAN PROFILE ANALYSIS
-Identify personality, strengths, weaknesses, learning style, urgency.
+Do:
 
-STEP 3: DIGITAL SKILL MATCHING
-Choose from:
-- Creative Skills
-- Technical Skills
-- Marketing & Sales
-- Communication Skills
-- Business Systems
-- Writing & Knowledge Work
+1. Greet user by name
+2. Analyze personality
+3. Recommend ONE main digital skill
+4. Give 2 supporting skills
+5. Explain WHY it fits
+6. Give a simple 90-day plan
+7. Show how to start earning
+8. End with motivation
 
-STEP 4: OUTPUT FORMAT (STRICT)
-Return ONLY in this format:
+Tone: human, warm, conversational
 
-1. HUMAN PROFILE SUMMARY
-2. PRIMARY SKILL (1)
-3. SECONDARY SKILLS (2)
-4. STACKABLE SKILLS (2–3)
-5. WHY THESE FIT THE USER
+No bullet overload. No robotic tone.
+`;
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "system", content: prompt }],
+        temperature: 0.7,
+      }),
+    });
+
+    const data = await response.json();
+
+    return Response.json({
+      result: data.choices?.[0]?.message?.content,
+    });
+  } catch (error) {
+    return Response.json({ result: "Error generating result" });
+  }
+}5. WHY THESE FIT THE USER
 6. 90-DAY ROADMAP (Month 1, 2, 3)
 7. HOW TO START EARNING
 8. STRATEGIC INSIGHTS (mistakes + advantages)
