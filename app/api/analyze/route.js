@@ -1,51 +1,62 @@
 export async function POST(req) {
   try {
     const body = await req.json();
+
     const { answers, name } = body;
 
+    console.log("NAME:", name);
+    console.log("ANSWERS:", answers);
+
+    if (!answers || Object.keys(answers).length === 0) {
+      return Response.json({
+        result: "No answers received. Check frontend data flow."
+      });
+    }
+
     const prompt = `
-You are Padi, a smart and friendly AI career coach.
+You are Padi, a world-class AI career coach.
 
-User name: ${name}
+User name: ${name || "User"}
 
-User responses:
-${JSON.stringify(answers)}
+Analyze deeply and return:
+- personality summary
+- best digital skill
+- why it fits
+- 90-day roadmap
+- monetization path
 
-Do the following:
-
-1. Greet the user by name
-2. Analyze their personality and strengths
-3. Recommend ONE best digital skill
-4. Suggest 2 supporting skills
-5. Explain why it fits them
-6. Give a clear 90-day roadmap
-7. Explain how they can start earning
-8. End with motivation
-
-Keep it human, simple, and practical.
+User answers:
+${JSON.stringify(answers, null, 2)}
 `;
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
-        messages: [{ role: "system", content: prompt }],
-        temperature: 0.7,
-      }),
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.7
+      })
     });
 
-    const data = await response.json();
+    const data = await res.json();
+
+    console.log("OPENAI RAW RESPONSE:", data);
+
+    const result = data?.choices?.[0]?.message?.content;
 
     return Response.json({
-      result: data.choices?.[0]?.message?.content,
+      result: result || "AI failed to generate response"
     });
-  } catch (error) {
+
+  } catch (err) {
+    console.error("API ERROR:", err);
+
     return Response.json({
-      result: "Something went wrong generating your result.",
+      result: "Server error occurred"
     });
   }
 }
