@@ -1,57 +1,60 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import jsPDF from "jspdf";
 
 export default function Result() {
   const [result, setResult] = useState("");
 
   useEffect(() => {
-    const answers = JSON.parse(localStorage.getItem("answers"));
-    const name = localStorage.getItem("name");
-
-    fetch("/api/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ answers, name }),
-    })
-      .then((res) => res.json())
-      .then((data) => setResult(data.result));
+    const data = localStorage.getItem("result");
+    setResult(data);
   }, []);
 
-  const downloadPDF = () => {
-    const doc = new jsPDF();
+  const download = () => {
+    const blob = new Blob([result], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
 
-    const text = result || "No result available";
-
-    const lines = doc.splitTextToSize(text, 180);
-
-    doc.text(lines, 10, 10);
-
-    doc.save("career-report.pdf");
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "padi-ai-report.txt";
+    a.click();
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Your Career Path</h2>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2>Your Career Report</h2>
 
-      <pre style={{ whiteSpace: "pre-wrap" }}>{result}</pre>
+        <pre style={styles.text}>{result}</pre>
 
-      <button
-        onClick={downloadPDF}
-        style={{
-          marginTop: 20,
-          background: "#F05A28",
-          color: "#fff",
-          padding: 10,
-          border: "none",
-          borderRadius: 6
-        }}
-      >
-        Download PDF
-      </button>
+        <button onClick={download} style={styles.button}>
+          Download Report
+        </button>
+      </div>
     </div>
   );
-                 }
+}
+
+const styles = {
+  container: {
+    padding: 20,
+    background: "#F5F7F8",
+    minHeight: "100vh"
+  },
+  card: {
+    background: "#fff",
+    padding: 20,
+    borderRadius: 15
+  },
+  text: {
+    whiteSpace: "pre-wrap"
+  },
+  button: {
+    marginTop: 20,
+    background: "#F05A28",
+    color: "#fff",
+    padding: 12,
+    border: "none",
+    borderRadius: 10
+  }
+};
