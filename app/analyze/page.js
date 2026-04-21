@@ -16,16 +16,28 @@ export default function Analyze() {
 
     const run = async () => {
       try {
-        const answers = JSON.parse(localStorage.getItem("answers"));
+        const raw = localStorage.getItem("answers");
+
+        // FIX 1: prevent crash if answers is null or invalid JSON
+        const answers = raw ? JSON.parse(raw) : null;
 
         const res = await fetch("/api/analyze", {
           method: "POST",
-          body: JSON.stringify({ answers }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // FIX 2: prevent sending undefined payload
+          body: JSON.stringify({ answers: answers || [] }),
         });
+
+        // FIX 3: prevent crash if API fails or returns non-json
+        if (!res.ok) {
+          throw new Error(`API Error: ${res.status}`);
+        }
 
         const data = await res.json();
 
-        localStorage.setItem("result", data.result);
+        localStorage.setItem("result", data.result || "");
 
         router.push("/result");
       } catch (err) {
@@ -44,41 +56,4 @@ export default function Analyze() {
       <p>Please wait while AI processes your answers...</p>
     </div>
   );
-}      body: JSON.stringify({ answers }),
-    });
-
-    const data = await res.json();
-    setResult(data.result);
-  };
-
-  return (
-    <div style={{ padding: 20 }}>
-      <h1>Career Strategy AI</h1>
-
-      {questions.map((q, i) => (
-        <div key={i} style={{ marginBottom: 10 }}>
-          <p>{q}</p>
-          <input
-            style={{ width: "100%", padding: 8 }}
-            onChange={(e) => handleChange(i, e.target.value)}
-          />
-        </div>
-      ))}
-
-      <button onClick={handleSubmit} style={{ marginTop: 20 }}>
-        Analyze My Path
-      </button>
-
-      <div style={{ marginTop: 30 }}>
-        <h2>AI Result</h2>
-        <pre style={{ whiteSpace: "pre-wrap" }}>{result}</pre>
-      </div>
-    </div>
-  );
-        }      </button>
-
-      <h3>Result:</h3>
-      <p>{result}</p>
-    </div>
-  );
-}
+      }
