@@ -1,40 +1,50 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { useState } from "react";
+export default function Analyze() {
+  const router = useRouter();
+  const [loadingText, setLoadingText] = useState("Analyzing your responses");
 
-export default function AnalyzePage() {
-  const [answers, setAnswers] = useState({});
-  const [result, setResult] = useState("");
+  useEffect(() => {
+    // simple animation effect
+    const interval = setInterval(() => {
+      setLoadingText((prev) =>
+        prev.length > 30 ? "Analyzing your responses" : prev + "."
+      );
+    }, 500);
 
-  const questions = [
-    "Introvert or extrovert?",
-    "Structure or flexibility?",
-    "Deep focus or fast-paced?",
-    "Creative, analytical, or practical?",
-    "Learn faster: watching, reading, or doing?",
-    "Problem-solving, storytelling, or organizing?",
-    "Work with people, systems, or ideas?",
-    "Topics you enjoy?",
-    "What do people ask you for help with?",
-    "Existing skills?",
-    "Device (phone/laptop)?",
-    "Stable internet?",
-    "Hours per week?",
-    "Income urgency?",
-    "Freelance, remote, or personal brand?"
-  ];
+    const run = async () => {
+      try {
+        const answers = JSON.parse(localStorage.getItem("answers"));
 
-  const handleChange = (index, value) => {
-    setAnswers({ ...answers, [index]: value });
-  };
+        const res = await fetch("/api/analyze", {
+          method: "POST",
+          body: JSON.stringify({ answers }),
+        });
 
-  const handleSubmit = async () => {
-    const res = await fetch("/api/analyze", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ answers }),
+        const data = await res.json();
+
+        localStorage.setItem("result", data.result);
+
+        router.push("/result");
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    };
+
+    run();
+
+    return () => clearInterval(interval);
+  }, [router]);
+
+  return (
+    <div style={{ padding: 40 }}>
+      <h2>{loadingText}</h2>
+      <p>Please wait while AI processes your answers...</p>
+    </div>
+  );
+}      body: JSON.stringify({ answers }),
     });
 
     const data = await res.json();
