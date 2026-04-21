@@ -1,46 +1,30 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import jsPDF from "jspdf";
 
 export default function Result() {
   const [result, setResult] = useState("");
 
   useEffect(() => {
-    setResult(localStorage.getItem("result"));
-  }, []);
+    const answers = JSON.parse(localStorage.getItem("answers"));
+    const name = localStorage.getItem("name");
 
-  const download = () => {
-    const doc = new jsPDF();
-    doc.text(result || "", 10, 10);
-    doc.save("result.pdf");
-  };
+    fetch("/api/analyze", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ answers, name }),
+    })
+      .then((res) => res.json())
+      .then((data) => setResult(data.result));
+  }, []);
 
   return (
     <div style={{ padding: 20 }}>
-      <h2>Your Skill Report</h2>
+      <h2>Your Career Path</h2>
 
-      <div style={{
-        background: "#fff",
-        padding: 20,
-        borderRadius: 10,
-        marginTop: 20
-      }}>
-        <pre style={{ whiteSpace: "pre-wrap" }}>
-          {result}
-        </pre>
-      </div>
-
-      <button
-        onClick={download}
-        style={{
-          marginTop: 20,
-          background: "#F05A28",
-          color: "#fff",
-          padding: 10
-        }}
-      >
-        Download PDF
-      </button>
+      <pre style={{ whiteSpace: "pre-wrap" }}>{result}</pre>
     </div>
   );
 }
