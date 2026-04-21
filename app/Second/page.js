@@ -1,88 +1,76 @@
 "use client";
+
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 const questions = [
-  "What kind of activities give you energy?",
-  "How do you approach tasks?",
-  "Are you more creative, analytical, or communicative?",
-  "Do you prefer working with people, systems, or ideas?",
-  "Structured or flexible work?",
-  "Do you prefer working alone or with a team?",
-  "What skills are you already exploring?",
-  "Which area interests you most?",
+  "Are you more introverted or extroverted?",
+  "Do you prefer structure or flexibility?",
+  "Do you enjoy deep focus or fast-paced work?",
+  "Are you more creative, analytical, or practical?",
+
+  "What kind of tasks do you enjoy doing without getting tired?",
+  "Do you prefer working alone or with others?",
+  "Are you more comfortable talking or writing?",
+
+  "What do people ask you for help with?",
+  "What topics interest you the most?",
+
+  "Do you currently have a job or are you starting from scratch?",
   "How many hours per week can you commit?",
-  "What is your current income situation?",
-  "What tools do you have?",
-  "Why do you want to learn a digital skill?"
+  "Do you have stable internet?",
+  "What device do you use?",
+
+  "Have you ever made money online before?",
+
+  "How soon do you need to start earning?",
+  "Do you prefer quick income or long-term income?",
+  "What is your target monthly income?",
+
+  "Are you willing to work with clients?",
+  "Do you prefer freelancing, remote job, or personal brand?",
+  "Are you willing to learn technical skills if needed?"
 ];
 
 export default function Second() {
-  const [step, setStep] = useState(0);
-  const [input, setInput] = useState("");
-  const [answers, setAnswers] = useState([]);
   const router = useRouter();
+
+  const [step, setStep] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [input, setInput] = useState("");
 
   const next = () => {
     if (!input) return;
 
-    const updated = [...answers, input];
+    const updated = {
+      ...answers,
+      [questions[step]]: input
+    };
+
     setAnswers(updated);
     setInput("");
 
-    if (step < questions.length - 1) {
+    if (step + 1 < questions.length) {
       setStep(step + 1);
     } else {
       localStorage.setItem("answers", JSON.stringify(updated));
-      router.push("/analyze");
+      router.push("/result");
     }
   };
 
   return (
     <div style={{ padding: 20 }}>
-      <div style={{
-        background: "#0F3D4C",
-        color: "#fff",
-        padding: 15,
-        borderRadius: 10
-      }}>
-        Question {step + 1} of {questions.length}
-      </div>
-
-      <div style={{
-        marginTop: 30,
-        background: "#E6F2F5",
-        padding: 20,
-        borderRadius: 10
-      }}>
-        {questions[step]}
-      </div>
+      <h3>{questions[step]}</h3>
 
       <input
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="Type your answer..."
-        style={{
-          width: "100%",
-          marginTop: 20,
-          padding: 10
-        }}
+        style={{ width: "100%", marginTop: 20, padding: 10 }}
       />
 
-      <button
-        onClick={next}
-        style={{
-          marginTop: 20,
-          background: "#F05A28",
-          color: "#fff",
-          padding: 10,
-          width: "100%",
-          border: "none",
-          borderRadius: 6
-        }}
-      >
+      <button onClick={next} style={{ marginTop: 20 }}>
         Next
       </button>
     </div>
   );
-          }
+}
